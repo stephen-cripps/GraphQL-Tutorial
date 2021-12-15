@@ -28,12 +28,28 @@ const books = [
   { id: 8, name: "Beyond the Shadows", authorId: 3 },
 ];
 
+const AuthorType = new GraphQLObjectType({
+  name: "Author",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLInt) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    books: {
+      type: new GraphQLList(BookType),
+      resolve: (author) => books.filter((b) => b.authorId === author.id),
+    },
+  }),
+});
+
 const BookType = new GraphQLObjectType({
   name: "Book",
   fields: () => ({
     id: { type: new GraphQLNonNull(GraphQLInt) },
     name: { type: new GraphQLNonNull(GraphQLString) },
     authorId: { type: new GraphQLNonNull(GraphQLInt) },
+    author: {
+      type: AuthorType,
+      resolve: (book) => authors.find((author) => author.id === book.id),
+    },
   }),
 });
 
@@ -44,6 +60,11 @@ const rootQueryType = new GraphQLObjectType({
       type: new GraphQLList(BookType),
       description: "List of All Books",
       resolve: () => books,
+    },
+    authors: {
+      type: new GraphQLList(AuthorType),
+      description: "List of All Authors",
+      resolve: () => authors,
     },
   }),
 });
